@@ -1,77 +1,103 @@
 <template>
     <section class="contact">
         <div class="container">
-            <h1>Contact Us</h1>
 
-            <p>
-                We'd love to hear from you. Feel free to get in touch with us.
+            <h1>Contact Me</h1>
+
+            <p class="intro">
+                I love to hear from you. Feel free to get in touch with Me.
             </p>
 
             <div class="contact-content">
 
-                <!-- Contact Information -->
-                <div class="contact-info">
-                    <h2>Get in Touch</h2>
-
-                    <p>
-                        If you have any questions, suggestions, or feedback,
-                        please contact us using the information below.
-                    </p>
-
-                    <p>
-                        <strong>Email:</strong>
-                        example@gmail.com
-                    </p>
-
-                    <p>
-                        <strong>Phone:</strong>
-                        +91 98765 43210
-                    </p>
-
-                    <p>
-                        <strong>Address:</strong>
-                        Kerala, India
-                    </p>
-                </div>
-
                 <!-- Contact Form -->
                 <div class="contact-form">
+
+                    <!-- Success Message -->
+                    <div
+                        v-if="successMessage"
+                        class="message success-message"
+                    >
+                        {{ successMessage }}
+                    </div>
+
+                    <!-- General Error Message -->
+                    <div
+                        v-if="errorMessage"
+                        class="message error-message"
+                    >
+                        {{ errorMessage }}
+                    </div>
+
                     <h2>Send Us a Message</h2>
 
                     <form @submit.prevent="submitForm">
 
+                        <!-- Name -->
                         <div class="form-group">
                             <label for="name">Name</label>
+
                             <input
                                 type="text"
                                 id="name"
                                 v-model="form.name"
                                 placeholder="Enter your name"
+                                :class="{ 'input-error': errors.name }"
                             >
+
+                            <small
+                                v-if="errors.name"
+                                class="field-error"
+                            >
+                                {{ errors.name[0] }}
+                            </small>
                         </div>
 
+                        <!-- Email -->
                         <div class="form-group">
                             <label for="email">Email</label>
+
                             <input
                                 type="email"
                                 id="email"
                                 v-model="form.email"
                                 placeholder="Enter your email"
+                                :class="{ 'input-error': errors.email }"
                             >
+
+                            <small
+                                v-if="errors.email"
+                                class="field-error"
+                            >
+                                {{ errors.email[0] }}
+                            </small>
                         </div>
 
+                        <!-- Message -->
                         <div class="form-group">
                             <label for="message">Message</label>
+
                             <textarea
                                 id="message"
                                 v-model="form.message"
-                                rows="5"
+                                rows="6"
                                 placeholder="Enter your message"
+                                :class="{ 'input-error': errors.message }"
                             ></textarea>
+
+                            <small
+                                v-if="errors.message"
+                                class="field-error"
+                            >
+                                {{ errors.message[0] }}
+                            </small>
                         </div>
 
-                        <button type="submit">
-                            Send Message
+                        <button
+                            type="submit"
+                            :disabled="loading"
+                        >
+                            {{ loading ? 'Sending...' : 'Send Message' }}
                         </button>
 
                     </form>
@@ -83,6 +109,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
     name: 'Contact',
 
@@ -92,66 +120,101 @@ export default {
                 name: '',
                 email: '',
                 message: ''
-            }
+            },
+
+            loading: false,
+            successMessage: '',
+            errorMessage: '',
+            errors: {}
         }
     },
 
     methods: {
-        submitForm() {
-            alert('Message sent successfully!')
 
-            this.form.name = ''
-            this.form.email = ''
-            this.form.message = ''
+        async submitForm() {
+
+            this.loading = true
+            this.successMessage = ''
+            this.errorMessage = ''
+            this.errors = {}
+
+            try {
+
+                const response = await axios.post(
+                    '/api/contact',
+                    this.form
+                )
+
+                this.successMessage = response.data.message
+
+                this.form = {
+                    name: '',
+                    email: '',
+                    message: ''
+                }
+
+            } catch (error) {
+
+                if (error.response?.status === 422) {
+
+                    this.errors = error.response.data.errors
+
+                } else {
+
+                    this.errorMessage =
+                        error.response?.data?.message ||
+                        'Something went wrong. Please try again.'
+                }
+
+            } finally {
+
+                this.loading = false
+            }
         }
     }
 }
 </script>
 
 <style scoped>
+
 .contact {
-    padding: 50px 0;
+    padding: 60px 20px;
 }
 
 .container {
-    width: 80%;
-    max-width: 1100px;
-    margin: auto;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .contact h1 {
     text-align: center;
     font-size: 36px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
-.contact > .container > p {
+.intro {
     text-align: center;
     line-height: 1.7;
+    margin-bottom: 40px;
 }
 
 .contact-content {
     display: flex;
-    gap: 40px;
-    margin-top: 40px;
+    justify-content: center;
 }
 
-.contact-info,
 .contact-form {
-    flex: 1;
-    padding: 25px;
+    width: 100%;
+    padding: 30px;
     border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
 }
 
-.contact-info h2,
 .contact-form h2 {
-    margin-bottom: 20px;
-}
-
-.contact-info p {
-    line-height: 1.7;
+    margin-bottom: 25px;
 }
 
 .form-group {
@@ -166,34 +229,93 @@ export default {
 
 .form-group input,
 .form-group textarea {
+    display: block;
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 6px;
     box-sizing: border-box;
     font-family: inherit;
+    font-size: 15px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #222;
 }
 
 .form-group textarea {
     resize: vertical;
+    min-height: 140px;
 }
 
 button {
-    padding: 12px 20px;
+    width: 100%;
+    padding: 13px 20px;
     background: #222;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
+    font-size: 16px;
 }
 
 button:hover {
     background: #444;
 }
 
-@media (max-width: 768px) {
-    .contact-content {
-        flex-direction: column;
-    }
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
+
+/* Success/Error */
+
+.message {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.success-message {
+    color: green;
+    background: #eaf8ea;
+}
+
+.error-message {
+    color: #800026;
+    background: #fdecef;
+}
+
+/* Validation errors */
+
+.field-error {
+    display: block;
+    margin-top: 5px;
+    color: #dc3545;
+}
+
+.input-error {
+    border-color: #dc3545 !important;
+}
+
+/* Mobile */
+
+@media (max-width: 768px) {
+
+    .contact {
+        padding: 40px 15px;
+    }
+
+    .contact h1 {
+        font-size: 30px;
+    }
+
+    .contact-form {
+        padding: 20px;
+    }
+
+}
+
 </style>

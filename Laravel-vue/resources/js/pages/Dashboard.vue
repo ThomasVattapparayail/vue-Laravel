@@ -80,15 +80,23 @@
 </template>
 
 <script>
-import Menu from '../components/back-end/Menu.vue';
+import axios from 'axios';
+
 export default {
     name: 'Dashboard',
-    components:{
-        Menu
-    },
-    methods: {
-        logout() {
-            this.$router.push('/login');
+
+    async mounted() {
+        try {
+            const response = await axios.get('/api/user');
+
+            if (!response.data.authenticated) {
+                this.$router.push('/');
+            }
+
+        } catch (error) {
+            if (error.response?.status === 401) {
+                this.$router.push('/');
+            }
         }
     }
 }

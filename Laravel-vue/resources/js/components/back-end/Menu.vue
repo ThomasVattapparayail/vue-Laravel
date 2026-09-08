@@ -3,7 +3,7 @@
 
             <nav>
                 <router-link to="/dashboard">Dashboard</router-link>
-                <router-link to="/dashboard/about">About</router-link>
+                <router-link to="/dashboard/about-admin">About</router-link>
                 <router-link to="/dashboard/contact">Contact</router-link>
                 
             </nav>

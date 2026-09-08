@@ -1,55 +1,93 @@
 <template>
     <section class="about">
         <div class="container">
-            <h1>About Me</h1>
+
+            <h1>{{ about.title }}</h1>
 
             <p>
-                Welcome to My Portfolio.
+                {{ about.description }}
             </p>
 
-            <p>
-                This  Portfolio is built using Laravel and Vue.js.
-                We create modern and user-friendly web applications.
-            </p>
+            <!-- Programming Languages -->
+            <div class="skills">
+                <h2>Programming Languages</h2>
 
-            <div class="about-cards">
-
-                <div class="card">
-                    <h2>Our Mission</h2>
-                    <p>
-                        Our mission is to build simple, reliable and
-                        high-quality web applications.
-                    </p>
+                <div class="skill-list">
+                    <span
+                        v-for="language in about.programming_languages"
+                        :key="language"
+                        class="skill"
+                    >
+                        {{ language }}
+                    </span>
                 </div>
-
-                <div class="card">
-                    <h2>Our Vision</h2>
-                    <p>
-                        Our vision is to create modern digital experiences
-                        using the latest technologies.
-                    </p>
-                </div>
-
-                <div class="card">
-                    <h2>Our Values</h2>
-                    <p>
-                        We believe in quality, innovation and customer
-                        satisfaction.
-                    </p>
-                </div>
-
             </div>
+
+            <!-- Frameworks -->
+            <div class="skills">
+                <h2>Frameworks & Technologies</h2>
+
+                <div class="skill-list">
+                    <span
+                        v-for="framework in about.frameworks"
+                        :key="framework"
+                        class="skill"
+                    >
+                        {{ framework }}
+                    </span>
+                </div>
+            </div>
+
         </div>
     </section>
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
-    name: 'About'
+
+    name: 'About',
+
+    data() {
+        return {
+            about: {
+                title: '',
+                description: '',
+                programming_languages: [],
+                frameworks: []
+            }
+        }
+    },
+
+    mounted() {
+        this.getAbout()
+    },
+
+    methods: {
+
+        async getAbout() {
+
+            try {
+
+                const response = await axios.get('/api/about')
+
+                this.about = response.data
+
+            } catch (error) {
+
+                console.error('Error loading about:', error)
+
+            }
+        }
+
+    }
+
 }
 </script>
 
 <style scoped>
+
 .about {
     padding: 50px 0;
 }
@@ -66,36 +104,30 @@ export default {
     margin-bottom: 20px;
 }
 
-.about > .container > p {
+.about p {
     text-align: center;
     line-height: 1.7;
 }
 
-.about-cards {
-    display: flex;
-    gap: 25px;
+.skills {
     margin-top: 40px;
 }
 
-.card {
-    flex: 1;
-    padding: 25px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+.skills h2 {
+    margin-bottom: 20px;
 }
 
-.card h2 {
-    font-size: 20px;
+.skill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
-.card p {
-    line-height: 1.6;
+.skill {
+    padding: 10px 15px;
+    background: #222;
+    color: white;
+    border-radius: 5px;
 }
 
-@media (max-width: 768px) {
-    .about-cards {
-        flex-direction: column;
-    }
-}
 </style>
