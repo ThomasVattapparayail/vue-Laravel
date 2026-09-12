@@ -1,4 +1,3 @@
-```php
 <?php
 
 namespace Database\Seeders;
@@ -20,4 +19,3 @@ class UserSeeder extends Seeder
         );
     }
 }
-```
