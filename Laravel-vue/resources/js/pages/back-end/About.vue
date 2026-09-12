@@ -453,96 +453,100 @@ async getAbout() {
 
 
 
+
         async saveAbout() {
-
-            this.loading = true
-
-            this.message = ''
-
-            this.error = ''
-
+            this.loading = true;
+            this.message = '';
+            this.error = '';
 
             try {
+                const token = localStorage.getItem('token');
 
-                let response
+                // Check authentication token
+                if (!token) {
+                    this.$router.push('/login');
+                    return;
+                }
+
+                let response;
+
+                const config = {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                };
 
                 if (!this.about.id) {
 
-                    response =
-                        await axios.post(
-                            '/api/about',
-                            this.about
-                        )
+                    // Create About
+                    response = await axios.post(
+                        '/api/about',
+                        this.about,
+                        config
+                    );
 
+                } else {
+
+                    // Update About
+                    response = await axios.put(
+                        '/api/about',
+                        this.about,
+                        config
+                    );
                 }
 
-
-                else {
-
-                    response =
-                        await axios.put(
-                            '/api/about',
-                            this.about
-                        )
-
-                }
-
-
-                this.about =
-                    response.data.data
-
+                this.about = response.data.data;
 
                 this.about.programming_languages =
-                    this.about.programming_languages || []
-
+                    this.about.programming_languages || [];
 
                 this.about.frameworks =
-                    this.about.frameworks || []
+                    this.about.frameworks || [];
 
-
-                this.editing = false
-
+                this.editing = false;
 
                 this.message =
-                    response.data.message
-
+                    response.data.message || 'About information saved successfully.';
 
             } catch (error) {
 
-                console.log(error.response?.data)
+                console.log('Status:', error.response?.status);
+                console.log('Response:', error.response?.data);
 
+                // Unauthorized
+                if (error.response?.status === 401) {
+                    localStorage.removeItem('token');
+                    this.$router.push('/login');
+                    return;
+                }
 
+                // Validation error
                 if (error.response?.status === 422) {
 
                     const errors =
-                        error.response.data.errors
-
+                        error.response.data.errors || {};
 
                     this.error =
                         Object.values(errors)
                             .flat()
-                            .join(' ')
+                            .join(' ');
 
-                }
-
-                else {
+                } else {
 
                     this.error =
                         error.response?.data?.message ||
-                        'Something went wrong.'
-
+                        'Something went wrong.';
                 }
-
 
             } finally {
 
-                this.loading = false
+                this.loading = false;
 
             }
-
-        },
-
-
+        }
+        ,
         async deleteAbout() {
 
             if (
@@ -550,65 +554,68 @@ async getAbout() {
                     'Are you sure you want to delete this About information?'
                 )
             ) {
-
-                return
-
+                return;
             }
 
-
-            this.loading = true
-
-            this.message = ''
-
-            this.error = ''
-
+            this.loading = true;
+            this.message = '';
+            this.error = '';
 
             try {
 
-                const response =
-                    await axios.delete(
-                        '/api/about'
-                    )
+                const token = localStorage.getItem('token');
 
-
-                this.about = {
-
-                    title: '',
-
-                    description: '',
-
-                    programming_languages: [],
-
-                    frameworks: []
-
+                // Check authentication
+                if (!token) {
+                    this.$router.push('/login');
+                    return;
                 }
 
+                const response = await axios.delete(
+                    '/api/about',
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            Accept: 'application/json'
+                        }
+                    }
+                );
 
-                this.editing = false
+                this.about = {
+                    title: '',
+                    description: '',
+                    programming_languages: [],
+                    frameworks: []
+                };
 
+                this.editing = false;
 
                 this.message =
-                    response.data.message
-
+                    response.data.message ||
+                    'About information deleted successfully.';
 
             } catch (error) {
 
-                console.log(error.response?.data)
+                console.log('Status:', error.response?.status);
+                console.log('Response:', error.response?.data);
 
+                // Unauthorized
+                if (error.response?.status === 401) {
+                    localStorage.removeItem('token');
+                    this.$router.push('/login');
+                    return;
+                }
 
                 this.error =
                     error.response?.data?.message ||
-                    'Unable to delete About information.'
-
+                    'Unable to delete About information.';
 
             } finally {
 
-                this.loading = false
+                this.loading = false;
 
             }
-
         }
-
     }
 
 }

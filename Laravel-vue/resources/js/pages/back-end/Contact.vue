@@ -141,26 +141,47 @@ export default {
             }
         },
         async deleteContact(id) {
-
             if (!confirm('Are you sure you want to delete this message?')) {
-                return
+                return;
             }
 
             try {
+                const token = localStorage.getItem('token');
 
-                await axios.delete(`/api/contacts/${id}`)
+                if (!token) {
+                    this.$router.push('/login');
+                    return;
+                }
+
+                await axios.delete(`/api/contacts/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        Accept: 'application/json'
+                    }
+                });
 
                 // Remove deleted contact from the list
                 this.contacts = this.contacts.filter(
                     contact => contact.id !== id
-                )
+                );
+
+                alert('Contact deleted successfully.');
 
             } catch (error) {
+                console.error('Status:', error.response?.status);
+                console.error('Error:', error.response?.data);
 
-                console.error(error)
+                // Token expired or invalid
+                if (error.response?.status === 401) {
+                    localStorage.removeItem('token');
+                    this.$router.push('/login');
+                    return;
+                }
 
-                alert('Unable to delete contact.')
-
+                alert(
+                    error.response?.data?.message ||
+                    'Unable to delete contact.'
+                );
             }
         },
 
