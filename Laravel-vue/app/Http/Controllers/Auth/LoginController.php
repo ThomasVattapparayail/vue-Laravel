@@ -19,6 +19,10 @@ class LoginController extends Controller
 
             $user = Auth::user();
 
+
+            $user = Auth::user(); 
+
+            $user->tokens()->delete();
             // Create Sanctum token
             $token = $user->createToken('auth_token')->plainTextToken;
 

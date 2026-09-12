@@ -9,7 +9,6 @@ use App\Http\Controllers\Backend\ContactController as BackendContact;
 use App\Http\Controllers\AboutController as FrontAboutController;
 
 Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout']);
 Route::post('/contact',[ContactController::class,'store']);
 Route::get('/contacts', [BackendContact::class, 'index']);
 Route::get('/about', [FrontAboutController::class, 'index']);
@@ -20,4 +19,5 @@ Route::middleware('auth:sanctum')->group(function () {
    Route::put('/about',[AboutController::class,'update']);
    Route::delete('/about', [AboutController::class, 'destroy']);
    Route::delete('/contacts/{id}', [BackendContact::class, 'destroy']);
+   Route::post('/logout', [LoginController::class, 'logout']);
 });
