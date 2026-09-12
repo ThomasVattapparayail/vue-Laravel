@@ -1,16 +1,16 @@
 <template>
     <div class="app">
 
-        <!-- Frontend Header -->
-        <Header v-if="!isDashboard" />
-
         <!-- Backend Header -->
-        <BackendHeader v-else />
+        <BackendHeader v-if="isDashboard" />
+
+        <!-- Frontend Header -->
+        <Header v-else />
 
         <!-- Dashboard Layout -->
-        <div class="dashboard-layout" v-if="isDashboard">
+        <div v-if="isDashboard" class="dashboard-layout">
 
-            <!-- Sidebar -->
+            <!-- Backend Sidebar -->
             <Sidebar />
 
             <!-- Dashboard Content -->
@@ -21,15 +21,15 @@
         </div>
 
         <!-- Normal Frontend Content -->
-        <main class="content" v-else>
+        <main v-else class="content">
             <router-view />
         </main>
 
-        <!-- Frontend Footer -->
-        <Footer v-if="!isDashboard" />
-
         <!-- Backend Footer -->
-        <BackendFooter v-else />
+        <BackendFooter v-if="isDashboard" />
+
+        <!-- Frontend Footer -->
+        <Footer v-else />
 
     </div>
 </template>
@@ -56,9 +56,7 @@ export default {
 
     computed: {
         isDashboard() {
-            return (
-                localStorage.getItem('token') 
-            )
+            return this.$route.path.startsWith('/dashboard')
         }
     }
 }
@@ -88,3 +86,4 @@ body,
     padding: 20px;
 }
 </style>
+
