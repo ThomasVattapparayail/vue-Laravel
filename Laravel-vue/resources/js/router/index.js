@@ -6,14 +6,10 @@ import Contact from '../pages/contact.vue';
 import Login from '../pages/Login.vue';
 
 import Dashboard from '../pages/Dashboard.vue';
-import DashboardAbout from '../pages/back-end/About.vue';
-import DashboardContact from '../pages/back-end/Contact.vue';
+import About1 from '../pages/back-end/About.vue';
+import Contact1 from '../pages/back-end/Contact.vue';
 
 const routes = [
-
-    // =========================
-    // FRONTEND
-    // =========================
 
     {
         path: '/',
@@ -33,97 +29,68 @@ const routes = [
         component: Contact
     },
 
-    // =========================
-    // LOGIN
-    // =========================
-
     {
         path: '/login',
         name: 'Login',
         component: Login
     },
 
-    // =========================
-    // BACKEND / DASHBOARD
-    // =========================
-
+    // Dashboard Home
     {
         path: '/dashboard',
         name: 'Dashboard',
         component: Dashboard,
-
         meta: {
             requiresAuth: true
-        },
+        }
+    },
 
-        children: [
+    // Dashboard About
+    {
+        path: '/dashboard/about',
+        name: 'DashboardAbout',
+        component: About1,
+        meta: {
+            requiresAuth: true
+        }
+    },
 
-            {
-                path: 'about',
-                name: 'DashboardAbout',
-                component: DashboardAbout
-            },
-
-            {
-                path: 'contact',
-                name: 'DashboardContact',
-                component: DashboardContact
-            }
-
-        ]
+    // Dashboard Contact
+    {
+        path: '/dashboard/contact',
+        name: 'DashboardContact',
+        component: Contact1,
+        meta: {
+            requiresAuth: true
+        }
     }
-
 ];
 
-
-// =========================
-// CREATE ROUTER
-// =========================
-
 const router = createRouter({
-
     history: createWebHistory(),
-
     routes
-
 });
-
-
-// =========================
-// AUTH GUARD
-// =========================
 
 router.beforeEach((to) => {
 
     const token = localStorage.getItem('token');
 
-    // User is trying to access dashboard
-    // without being logged in
+    // Dashboard pages require login
     if (to.meta.requiresAuth && !token) {
-
         return {
             name: 'Login'
         };
-
     }
 
-
-    // User is already logged in
-    // and tries to open login page
+    // Already logged in → don't allow login page
     if (to.name === 'Login' && token) {
-
         return {
             name: 'Dashboard'
         };
-
     }
 
-
-    // Allow navigation
     return true;
-
 });
-
 
 export default router;
 

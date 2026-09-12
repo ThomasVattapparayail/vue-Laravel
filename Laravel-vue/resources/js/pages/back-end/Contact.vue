@@ -101,30 +101,45 @@ export default {
     methods: {
 
         async getContacts() {
-
-            this.loading = true
-            this.errorMessage = ''
+            this.loading = true;
+            this.errorMessage = '';
 
             try {
+                const token = localStorage.getItem('token');
 
-                const response = await axios.get('/api/contacts')
+                // No token = user is not logged in
+                if (!token) {
+                    this.$router.push('/login');
+                    return;
+                }
 
-                this.contacts = response.data
+                const response = await axios.get('/api/dashboard/contact', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        Accept: 'application/json'
+                    }
+                });
+
+                this.contacts = response.data.data || response.data;
 
             } catch (error) {
+                console.error('Status:', error.response?.status);
+                console.error('Error:', error.response?.data);
 
-                console.error(error)
+                // Token is invalid/expired
+                if (error.response?.status === 401) {
+                    localStorage.removeItem('token');
+                    this.$router.push('/login');
+                    return;
+                }
 
                 this.errorMessage =
-                    'Unable to load contact messages.'
+                    'Unable to load contact messages.';
 
             } finally {
-
-                this.loading = false
-
+                this.loading = false;
             }
         },
-
         async deleteContact(id) {
 
             if (!confirm('Are you sure you want to delete this message?')) {

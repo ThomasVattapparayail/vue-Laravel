@@ -7,6 +7,7 @@
         <!-- Backend Header -->
         <BackendHeader v-else />
 
+        <!-- Dashboard Layout -->
         <div class="dashboard-layout" v-if="isDashboard">
 
             <!-- Sidebar -->
@@ -55,7 +56,9 @@ export default {
 
     computed: {
         isDashboard() {
-            return this.$route.path.startsWith('/dashboard')
+            return (
+                localStorage.getItem('token') 
+            )
         }
     }
 }
@@ -85,4 +88,3 @@ body,
     padding: 20px;
 }
 </style>
-

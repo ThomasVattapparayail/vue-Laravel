@@ -369,39 +369,34 @@ export default {
         // GET ABOUT
         // ==========================================
 
-        async getAbout() {
+async getAbout() {
+    try {
+        const token = localStorage.getItem('token');
 
-            try {
-
-                const response =
-                    await axios.get('/api/about')
-
-
-                if (response.data.data) {
-
-                    this.about =
-                        response.data.data
-
-
-                    this.about.programming_languages =
-                        this.about.programming_languages || []
-
-
-                    this.about.frameworks =
-                        this.about.frameworks || []
-
-                }
-
-            } catch (error) {
-
-                console.log(error.response?.data)
-
-                this.error =
-                    'Unable to load About information.'
-
+        const response = await axios.get('/api/dashboard/about', {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/json'
             }
+        });
 
-        },
+        if (response.data.data) {
+            this.about = response.data.data;
+
+            this.about.programming_languages =
+                this.about.programming_languages || [];
+
+            this.about.frameworks =
+                this.about.frameworks || [];
+        }
+
+    } catch (error) {
+        console.log('Status:', error.response?.status);
+        console.log('Error:', error.response?.data);
+
+        this.error = 'Unable to load About information.';
+    }
+},
 
 
         // ==========================================
@@ -1118,4 +1113,3 @@ td {
 }
 
 </style>
-

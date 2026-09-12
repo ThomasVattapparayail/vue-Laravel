@@ -40,6 +40,14 @@ class LoginController extends Controller
         ], 401);
     }
 
+    public function user(Request $request)
+    {
+        return response()->json([
+            'authenticated' => true,
+            'user' => $request->user()
+        ]);
+    }
+
     public function logout(Request $request)
     {
         if ($request->user()) {

@@ -1,18 +1,38 @@
-```vue
 <template>
     <div class="dashboard">
 
-        <!-- Main Content -->
         <main class="main-content">
 
             <header class="topbar">
                 <h1>Dashboard</h1>
-                <span>Welcome!</span>
+
+                <span v-if="user">
+                    Welcome, {{ user.name }}!
+                </span>
+
+                <span v-else>
+                    Loading...
+                </span>
             </header>
 
             <section class="content">
 
                 <h2>Welcome to your Dashboard</h2>
+
+                <!-- User Information -->
+                <div v-if="user" class="user-info">
+                    <h3>Logged-in User</h3>
+
+                    <p>
+                        <strong>Name:</strong>
+                        {{ user.name }}
+                    </p>
+
+                    <p>
+                        <strong>Email:</strong>
+                        {{ user.email }}
+                    </p>
+                </div>
 
                 <div class="cards">
 
@@ -85,21 +105,70 @@ import axios from 'axios';
 export default {
     name: 'Dashboard',
 
-    async mounted() {
-        try {
-            const response = await axios.get('/api/user');
+    data() {
+        return {
+            user: null,
+        };
+    },
 
-            if (!response.data.authenticated) {
-                this.$router.push('/');
+    async mounted() {
+        await this.getUser();
+    },
+
+    methods: {
+
+        async getUser() {
+
+            const token = localStorage.getItem('token');
+
+            // No token
+            if (!token) {
+                this.$router.replace('/login');
+                return;
             }
 
-        } catch (error) {
-            if (error.response?.status === 401) {
-                this.$router.push('/');
+            try {
+
+                const response = await axios.get('/api/user', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        Accept: 'application/json'
+                    }
+                });
+
+                console.log('User API response:', response.data);
+
+                if (response.data.authenticated) {
+
+                    this.user = response.data.user;
+
+                } else {
+
+                    localStorage.removeItem('token');
+                    this.$router.replace('/login');
+
+                }
+
+            } catch (error) {
+
+                console.error('Get user error:', error);
+
+                if (error.response?.status === 401) {
+
+                    localStorage.removeItem('token');
+                    this.$router.replace('/login');
+
+                } else {
+
+                    console.error(
+                        'Unable to get authenticated user.'
+                    );
+
+                }
             }
         }
     }
-}
+};
 </script>
 
 <style scoped>
@@ -108,23 +177,6 @@ export default {
     min-height: 100vh;
     background: #f5f6fa;
 }
-
-
-.logout {
-    margin-top: auto;
-    padding: 10px;
-    border: none;
-    background: #dc3545;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.logout:hover {
-    background: #c82333;
-}
-
-/* Main Content */
 
 .main-content {
     flex: 1;
@@ -139,8 +191,35 @@ export default {
     border-bottom: 1px solid #ddd;
 }
 
+.topbar h1 {
+    margin: 0;
+}
+
+.topbar span {
+    color: #555;
+}
+
 .content {
     padding: 30px;
+}
+
+/* User Information */
+
+.user-info {
+    background: white;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.user-info h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.user-info p {
+    margin: 8px 0;
 }
 
 /* Cards */
@@ -203,10 +282,6 @@ th {
 }
 
 @media (max-width: 600px) {
-    .sidebar {
-        width: 180px;
-    }
-
     .cards {
         grid-template-columns: 1fr;
     }
