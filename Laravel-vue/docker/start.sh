@@ -6,18 +6,6 @@ echo "========================================"
 echo "Starting Laravel application"
 echo "========================================"
 
-echo "Clearing configuration cache..."
-
-php artisan config:clear
-
-echo "Clearing route cache..."
-
-php artisan route:clear
-
-echo "Clearing view cache..."
-
-php artisan view:clear
-
 echo "Running database migrations..."
 
 php artisan migrate --force
@@ -38,10 +26,6 @@ echo "Caching Laravel views..."
 
 php artisan view:cache
 
-echo "Starting PHP-FPM..."
+echo "Starting Laravel server..."
 
-php-fpm -D
-
-echo "Starting Nginx..."
-
-exec nginx -g "daemon off;"
+exec php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
