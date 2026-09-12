@@ -7,6 +7,7 @@ echo "Starting Laravel application"
 echo "========================================"
 
 php artisan migrate --force
+php artisan db:seed --force
 
 php artisan storage:link || true
 
