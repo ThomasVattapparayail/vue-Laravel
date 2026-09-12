@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendStoredMessageEmail;
 use App\Models\Contact;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,9 @@ class ContactController extends Controller
          'message' => 'required|string', 
          ]);
 
-       Contact::create($validated);
+       $message=Contact::create($validated);
+
+        SendStoredMessageEmail::dispatch($message->id);
 
       return response()->json([ 'message' => 'Message sent successfully!' ], 201); 
     }

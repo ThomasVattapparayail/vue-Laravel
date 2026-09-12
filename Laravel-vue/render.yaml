@@ -1,0 +1,148 @@
+services:
+
+  # =======================================================
+  # Laravel + Vue
+  # =======================================================
+
+  - type: web
+    name: midhun-laravel-vue
+    runtime: docker
+    plan: free
+
+    region: singapore
+
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+
+    healthCheckPath: /
+
+    envVars:
+
+      - key: APP_NAME
+        value: "My Website"
+
+      - key: APP_ENV
+        value: production
+
+      - key: APP_DEBUG
+        value: "false"
+
+      - key: APP_URL
+        sync: false
+
+      - key: APP_KEY
+        sync: false
+
+      - key: LOG_CHANNEL
+        value: stderr
+
+      - key: LOG_LEVEL
+        value: error
+
+      # -----------------------------------------------
+      # Database
+      # -----------------------------------------------
+
+      - key: DB_CONNECTION
+        value: mysql
+
+      - key: DB_HOST
+        fromService:
+          type: pserv
+          name: midhun-mysql
+          property: host
+
+      - key: DB_PORT
+        value: "3306"
+
+      - key: DB_DATABASE
+        value: laravel_vue
+
+      - key: DB_USERNAME
+        value: laravel_user
+
+      - key: DB_PASSWORD
+        sync: false
+
+      # -----------------------------------------------
+      # Session
+      # -----------------------------------------------
+
+      - key: SESSION_DRIVER
+        value: database
+
+      # -----------------------------------------------
+      # Cache
+      # -----------------------------------------------
+
+      - key: CACHE_STORE
+        value: database
+
+      # -----------------------------------------------
+      # Queue
+      # -----------------------------------------------
+
+      - key: QUEUE_CONNECTION
+        value: database
+
+      # -----------------------------------------------
+      # Mail
+      # -----------------------------------------------
+
+      - key: MAIL_MAILER
+        value: smtp
+
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+
+      - key: MAIL_PORT
+        value: "587"
+
+      - key: MAIL_USERNAME
+        sync: false
+
+      - key: MAIL_PASSWORD
+        sync: false
+
+      - key: MAIL_ENCRYPTION
+        value: tls
+
+      - key: MAIL_FROM_ADDRESS
+        sync: false
+
+      - key: MAIL_FROM_NAME
+        value: "My Website"
+
+  # =======================================================
+  # MySQL
+  # =======================================================
+
+  - type: pserv
+    name: midhun-mysql
+    runtime: image
+
+    plan: starter
+
+    region: singapore
+
+    image:
+      url: docker.io/library/mysql:8.0
+
+    envVars:
+
+      - key: MYSQL_DATABASE
+        value: laravel_vue
+
+      - key: MYSQL_USER
+        value: laravel_user
+
+      - key: MYSQL_PASSWORD
+        sync: false
+
+      - key: MYSQL_ROOT_PASSWORD
+        sync: false
+
+    disk:
+      name: mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 10
