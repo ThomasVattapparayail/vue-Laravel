@@ -4,6 +4,7 @@
             <h1>Login</h1>
 
             <form @submit.prevent="login">
+
                 <div class="form-group">
                     <label>Email</label>
 
@@ -29,6 +30,7 @@
                 <button type="submit" :disabled="loading">
                     {{ loading ? 'Logging in...' : 'Login' }}
                 </button>
+
             </form>
 
             <p v-if="message" class="message">
@@ -55,39 +57,53 @@ export default {
 
     methods: {
         async login() {
+
             this.loading = true;
             this.message = '';
 
             try {
+
                 const response = await axios.post('/api/login', {
                     email: this.email,
                     password: this.password
                 });
 
-                if (response.data.success) {
+                console.log('Login response:', response.data);
 
-                    // Store Sanctum token
+                if (response.data.success && response.data.token) {
+
+                    // Save token
                     localStorage.setItem(
                         'token',
                         response.data.token
                     );
 
-                    // Store user information
+                    // Save user
                     localStorage.setItem(
                         'user',
                         JSON.stringify(response.data.user)
                     );
 
-                    // Redirect to dashboard
-                    this.$router.push('/dashboard');
+                    // Go to dashboard
+                    window.location.href = '/dashboard';
+
+                } else {
+
+                    this.message = 'Login successful, but token was not received.';
                 }
 
             } catch (error) {
+
+                console.error('Login error:', error);
+
                 this.message =
                     error.response?.data?.message ||
                     'Invalid email or password.';
+
             } finally {
+
                 this.loading = false;
+
             }
         }
     }
@@ -157,3 +173,4 @@ button:disabled {
     color: red;
 }
 </style>
+
