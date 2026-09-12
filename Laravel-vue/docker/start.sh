@@ -3,20 +3,16 @@
 set -e
 
 echo "========================================"
-echo "Starting Laravel + Vue"
+echo "Starting Laravel application"
 echo "========================================"
-
-echo "Running database migrations..."
 
 php artisan migrate --force
 
-echo "Creating storage link..."
-
 php artisan storage:link || true
 
-echo "Building Vue/Vite..."
-
-npm run build
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
 
 echo "Starting Laravel server..."
 

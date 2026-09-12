@@ -1,43 +1,49 @@
-FROM node:20-bookworm
+FROM php:8.2-cli
 
 WORKDIR /var/www
 
-# Install PHP and required packages
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    php8.2 \
-    php8.2-cli \
-    php8.2-fpm \
-    php8.2-pgsql \
-    php8.2-mbstring \
-    php8.2-xml \
-    php8.2-curl \
-    php8.2-zip \
-    php8.2-bcmath \
-    php8.2-gd \
-    unzip \
     git \
+    unzip \
     curl \
+    libpq-dev \
+    libzip-dev \
+    libpng-dev \
+    libonig-dev \
+    && docker-php-ext-install \
+    pdo_pgsql \
+    mbstring \
+    bcmath \
+    gd \
+    zip \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy project
-COPY . /var/www
+# Install Node.js 20
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
 
-# Install Node dependencies
-RUN npm ci
+# Copy Laravel project
+COPY . .
 
-# Install Laravel dependencies
+# Install PHP dependencies
 RUN composer install \
     --no-dev \
     --no-interaction \
     --prefer-dist \
     --optimize-autoloader
 
-# Permissions
-RUN mkdir -p \
-    storage/framework/cache \
+# Install Vue dependencies
+RUN npm ci
+
+# Build Vue
+RUN npm run build
+
+# Laravel permissions
+RUN mkdir -p storage/framework/cache \
     storage/framework/sessions \
     storage/framework/views \
     storage/logs \
@@ -45,7 +51,6 @@ RUN mkdir -p \
 
 RUN chmod -R 775 storage bootstrap/cache
 
-# Render uses this port
 EXPOSE 10000
 
 COPY docker/start.sh /start.sh
