@@ -6,6 +6,7 @@
             <form @submit.prevent="login">
                 <div class="form-group">
                     <label>Email</label>
+
                     <input
                         type="email"
                         v-model="email"
@@ -16,6 +17,7 @@
 
                 <div class="form-group">
                     <label>Password</label>
+
                     <input
                         type="password"
                         v-model="password"
@@ -24,7 +26,9 @@
                     >
                 </div>
 
-                <button type="submit">Login</button>
+                <button type="submit" :disabled="loading">
+                    {{ loading ? 'Logging in...' : 'Login' }}
+                </button>
             </form>
 
             <p v-if="message" class="message">
@@ -36,6 +40,7 @@
 
 <script>
 import axios from 'axios';
+
 export default {
     name: 'Login',
 
@@ -43,67 +48,89 @@ export default {
         return {
             email: '',
             password: '',
-            message: ''
-        }
+            message: '',
+            loading: false
+        };
     },
 
     methods: {
         async login() {
-             try {
-                 const response = await axios.post('/api/login',
-                  {
-                     email: this.email, password: this.password 
-                    }
-                );
-                  if (response.data.success) 
-                  { 
-                    this.$router.push('/dashboard');
+            this.loading = true;
+            this.message = '';
 
-                   }
-                 } catch (error)
-                  { 
-                    this.message = error.response?.data?.message || 'Login failed';
-                  } 
+            try {
+                const response = await axios.post('/api/login', {
+                    email: this.email,
+                    password: this.password
+                });
+
+                if (response.data.success) {
+
+                    // Store Sanctum token
+                    localStorage.setItem(
+                        'token',
+                        response.data.token
+                    );
+
+                    // Store user information
+                    localStorage.setItem(
+                        'user',
+                        JSON.stringify(response.data.user)
+                    );
+
+                    // Redirect to dashboard
+                    this.$router.push('/dashboard');
                 }
+
+            } catch (error) {
+                this.message =
+                    error.response?.data?.message ||
+                    'Invalid email or password.';
+            } finally {
+                this.loading = false;
+            }
+        }
     }
-}
+};
 </script>
 
 <style scoped>
 .login-page {
-    min-height: 80vh;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    background: #f5f5f5;
 }
 
 .login-box {
-    width: 400px;
+    width: 100%;
+    max-width: 400px;
     padding: 30px;
     background: white;
     border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
+.login-box h1 {
     text-align: center;
     margin-bottom: 25px;
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
-label {
+.form-group label {
     display: block;
     margin-bottom: 7px;
-    font-weight: bold;
+    font-weight: 600;
 }
 
-input {
+.form-group input {
     width: 100%;
     padding: 12px;
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
     border-radius: 5px;
     box-sizing: border-box;
 }
@@ -113,17 +140,20 @@ button {
     padding: 12px;
     border: none;
     border-radius: 5px;
-    background: #333;
+    background: #222;
     color: white;
+    font-size: 16px;
     cursor: pointer;
 }
 
-button:hover {
-    background: #555;
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .message {
-    text-align: center;
     margin-top: 15px;
+    text-align: center;
+    color: red;
 }
 </style>

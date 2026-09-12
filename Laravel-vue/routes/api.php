@@ -14,7 +14,7 @@ Route::post('/contact',[ContactController::class,'store']);
 Route::get('/contacts', [BackendContact::class, 'index']);
 Route::get('/about', [FrontAboutController::class, 'index']);
 
-Route::middleware('admin')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
    Route::get('/about-admin',[AboutController::class,'index']);
    Route::post('/about',[AboutController::class,'store']);
    Route::put('/about',[AboutController::class,'update']);
