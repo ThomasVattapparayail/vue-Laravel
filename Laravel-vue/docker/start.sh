@@ -6,20 +6,23 @@ echo "========================================"
 echo "Starting Laravel application"
 echo "========================================"
 
-echo "Clearing Laravel caches..."
+echo "Preparing Laravel..."
 
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
-php artisan cache:clear
+
+echo "Running database migrations..."
+
+php artisan migrate --force
 
 echo "Creating storage link..."
 
 php artisan storage:link || true
 
-echo "Running database migrations..."
+echo "Clearing application cache..."
 
-php artisan migrate --force
+php artisan cache:clear
 
 echo "Caching Laravel configuration..."
 
