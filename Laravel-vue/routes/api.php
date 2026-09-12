@@ -10,11 +10,11 @@ use App\Http\Controllers\AboutController as FrontAboutController;
 
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/contact',[ContactController::class,'store']);
-Route::get('/contacts', [BackendContact::class, 'index']);
 Route::get('/about', [FrontAboutController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
-   Route::get('/about-admin',[AboutController::class,'index']);
+   Route::get('dashboard/about',[AboutController::class,'index']);
+   Route::get('dashboard/contacts', [BackendContact::class, 'index']);
    Route::post('/about',[AboutController::class,'store']);
    Route::put('/about',[AboutController::class,'update']);
    Route::delete('/about', [AboutController::class, 'destroy']);
